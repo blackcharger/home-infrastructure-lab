@@ -9,6 +9,12 @@ run against real uptime, backup, and recovery expectations — not a tutorial sa
 
 ---
 
+## Architecture
+
+![Home infrastructure lab architecture](docs/architecture.svg)
+
+---
+
 ## Overview
 
 Three enterprise Dell PowerEdge servers running a mix of virtualization, containerized
@@ -21,8 +27,9 @@ and graceful failure under power or hardware loss.
 - **2-node Proxmox VE high-availability cluster** (Dell R430 + R740xd) providing compute and VMs.
 - **Quorum via an external QDevice** (corosync-qnetd) running on a third host, so the cluster
   stays quorate and tolerant when a single node is lost.
-- **Separate Ubuntu file/backup server** (Dell R730xd) holding bulk storage on a large RAID6
-  array, plus the backup datastore — deliberately *not* a cluster compute member.
+- **Separate Ubuntu file/backup server** (Dell R730xd) holding bulk storage on a
+  **46.8 TB raw / 43.2 TB usable (≈39 TiB)** RAID6 array, plus the backup datastore —
+  deliberately *not* a cluster compute member.
 - Dual **UPS** units with a monitoring daemon that triggers coordinated, graceful shutdown
   when either unit drops below a safe runtime threshold.
 
@@ -67,76 +74,3 @@ Linux & Windows server administration · Proxmox virtualization & HA · Docker /
 network segmentation & firewall design · WireGuard VPN · DNS filtering · AWS S3 / IAM ·
 encrypted backup & disaster recovery · infrastructure documentation · (building) Terraform,
 Ansible, Kubernetes, CI/CD.
-
-## Architecture
-
-WAN lands on Node 1 (R430) and is routed by a **virtualized** pfSense gateway, out over a
-10 Gb aggregation switch to a 2-node Proxmox HA cluster and an external-quorum file/backup
-server. Services run in Docker; three backup tiers end in client-side-encrypted offsite storage.
-
-```mermaid
-flowchart TD
-    NET(["Internet<br/>2.5 Gb WAN"]) --> FW["pfSense<br/>Firewall + WireGuard VPN"]
-    FW --> SW["10 Gb SFP+<br/>Aggregation Switch"]
-
-    SW --> VL
-    subgraph VL["Zero-Trust VLAN Segmentation"]
-        direction LR
-        MGMT["Management"]
-        CAM["Cameras"]
-        IOT["IoT"]
-        GUEST["Guest"]
-        USER["User"]
-    end
-
-    SW --> CL
-    SW --> ST
-
-    subgraph CL["Proxmox HA Cluster"]
-        direction LR
-        N1["Node 1 · R430<br/>hosts pfSense VM + workloads"]
-        N2["Node 2 · R740xd<br/>compute / VMs"]
-    end
-    FW -.->|VM on| N1
-
-    subgraph ST["File / Backup Server · R730xd"]
-        direction LR
-        STOR[("File Server<br/>RAID6 ~40 TB")]
-        PBS["Proxmox<br/>Backup Server"]
-        QD["QDevice"]
-    end
-    QD -.->|quorum| N1
-
-    CL --> SVC
-    subgraph SVC["Containerized Services · Docker"]
-        direction LR
-        DNS["PiHole"]
-        PROXY["Caddy<br/>Proxy + CA"]
-        MEDIA["Media<br/>Jellyfin / arr"]
-        HAUT["Home<br/>Automation"]
-        NVR["NVR"]
-        PHOTO["Photos<br/>GPU"]
-        VAULT["Secrets"]
-    end
-    SVC -->|Tier 1 · nightly snapshots| PBS
-    SVC -->|Tier 2 · weekly config tarballs| STOR
-    STOR ==>|Tier 3 · encrypted offsite| S3[("AWS S3<br/>Glacier Deep Archive")]
-
-    classDef net fill:#1565c0,stroke:#0d47a1,color:#fff
-    classDef vlan fill:#1976d2,stroke:#0d47a1,color:#fff
-    classDef fw fill:#c62828,stroke:#8e0000,color:#fff
-    classDef compute fill:#e57000,stroke:#ac4800,color:#fff
-    classDef storage fill:#00897b,stroke:#005b4f,color:#fff
-    classDef backup fill:#455a64,stroke:#1c313a,color:#fff
-    classDef svc fill:#5e35b1,stroke:#4527a0,color:#fff
-    classDef cloud fill:#ff9900,stroke:#c77700,color:#000
-
-    class NET,SW net
-    class MGMT,CAM,IOT,GUEST,USER vlan
-    class FW fw
-    class N1,N2 compute
-    class STOR,QD storage
-    class PBS backup
-    class DNS,PROXY,MEDIA,HAUT,NVR,PHOTO,VAULT svc
-    class S3 cloud
-```
