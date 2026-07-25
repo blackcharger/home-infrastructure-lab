@@ -70,14 +70,14 @@ Ansible, Kubernetes, CI/CD.
 
 ## Architecture
 
-End-to-end topology: internet ingress through a segmented firewall, a Proxmox HA cluster
-with external-quorum file/backup server, a containerized service stack, and a 3-tier backup
-pipeline that ends in client-side-encrypted offsite cloud storage.
+WAN lands on Node 1 (R430) and is routed by a **virtualized** pfSense gateway, out over a
+10 Gb aggregation switch to a 2-node Proxmox HA cluster and an external-quorum file/backup
+server. Services run in Docker; three backup tiers end in client-side-encrypted offsite storage.
 
 ```mermaid
 flowchart TD
     NET(["Internet<br/>2.5 Gb WAN"]) --> FW["pfSense<br/>Firewall + WireGuard VPN"]
-    FW --> SW["10 Gb SFP+<br/>Core Switch"]
+    FW --> SW["10 Gb SFP+<br/>Aggregation Switch"]
 
     SW --> VL
     subgraph VL["Zero-Trust VLAN Segmentation"]
@@ -93,56 +93,50 @@ flowchart TD
     SW --> ST
 
     subgraph CL["Proxmox HA Cluster"]
-        N1["Node 1 · R430<br/>Compute / VMs"]
-        N2["Node 2 · R740xd<br/>Compute / VMs"]
+        direction LR
+        N1["Node 1 · R430<br/>hosts pfSense VM + workloads"]
+        N2["Node 2 · R740xd<br/>compute / VMs"]
     end
+    FW -.->|VM on| N1
 
     subgraph ST["File / Backup Server · R730xd"]
-        RAID[("RAID6<br/>Bulk Storage")]
-        PBS["Proxmox Backup Server"]
-        QD["QDevice<br/>3rd quorum vote"]
+        direction LR
+        STOR[("File Server<br/>RAID6 ~40 TB")]
+        PBS["Proxmox<br/>Backup Server"]
+        QD["QDevice"]
     end
-
     QD -.->|quorum| N1
 
     CL --> SVC
     subgraph SVC["Containerized Services · Docker"]
         direction LR
-        DNS["PiHole<br/>DNS Filter"]
-        PROXY["Caddy<br/>Reverse Proxy + CA"]
+        DNS["PiHole"]
+        PROXY["Caddy<br/>Proxy + CA"]
         MEDIA["Media<br/>Jellyfin / arr"]
         HAUT["Home<br/>Automation"]
         NVR["NVR"]
-        PHOTO["Photos<br/>GPU passthrough"]
-        VAULT["Secrets<br/>Vault"]
+        PHOTO["Photos<br/>GPU"]
+        VAULT["Secrets"]
     end
-
-    subgraph BK["3-Tier Backup"]
-        T1["Tier 1<br/>Nightly VM snapshots"]
-        T2["Tier 2<br/>Weekly config tarballs"]
-        T3["Tier 3<br/>Offsite · client-side encrypted"]
-    end
-
-    SVC --> T1 --> PBS
-    SVC --> T2 --> RAID
-    RAID --> T3
-    T3 ==>|encrypted| S3[("AWS S3<br/>Glacier Deep Archive + Standard")]
+    SVC -->|Tier 1 · nightly snapshots| PBS
+    SVC -->|Tier 2 · weekly config tarballs| STOR
+    STOR ==>|Tier 3 · encrypted offsite| S3[("AWS S3<br/>Glacier Deep Archive")]
 
     classDef net fill:#1565c0,stroke:#0d47a1,color:#fff
     classDef vlan fill:#1976d2,stroke:#0d47a1,color:#fff
     classDef fw fill:#c62828,stroke:#8e0000,color:#fff
     classDef compute fill:#e57000,stroke:#ac4800,color:#fff
     classDef storage fill:#00897b,stroke:#005b4f,color:#fff
-    classDef svc fill:#5e35b1,stroke:#4527a0,color:#fff
     classDef backup fill:#455a64,stroke:#1c313a,color:#fff
+    classDef svc fill:#5e35b1,stroke:#4527a0,color:#fff
     classDef cloud fill:#ff9900,stroke:#c77700,color:#000
 
     class NET,SW net
     class MGMT,CAM,IOT,GUEST,USER vlan
     class FW fw
     class N1,N2 compute
-    class RAID,PBS,QD storage
+    class STOR,QD storage
+    class PBS backup
     class DNS,PROXY,MEDIA,HAUT,NVR,PHOTO,VAULT svc
-    class T1,T2,T3 backup
     class S3 cloud
 ```
