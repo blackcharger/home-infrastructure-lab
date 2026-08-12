@@ -13,6 +13,9 @@ run against real uptime, backup, and recovery expectations — not a tutorial sa
 
 ![Home infrastructure lab architecture](docs/architecture.svg)
 
+📋 **[Architecture Decision Records →](docs/adr/)** — why it is built this way, and what was
+rejected. Includes the cross-node reset fault and its root cause.
+
 ---
 
 ## Overview
