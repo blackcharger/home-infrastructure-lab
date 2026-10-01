@@ -28,6 +28,9 @@ and graceful failure under power or hardware loss.
 ## Compute & Virtualization
 
 - **2-node Proxmox VE high-availability cluster** (Dell R430 + R740xd) providing compute and VMs.
+- **VM storage on enterprise SAS SSD in RAID6** (8 drives, ≈2.2 TiB, survives any two drive
+  failures), replacing a consumer SATA drive that failed under backup load —
+  [ADR-0007](docs/adr/0007-vm-storage-raid6-enterprise-sas.md).
 - **Quorum via an external QDevice** (corosync-qnetd) running on a third host, so the cluster
   stays quorate and tolerant when a single node is lost.
 - **Separate Ubuntu file/backup server** (Dell R730xd) holding bulk storage on a

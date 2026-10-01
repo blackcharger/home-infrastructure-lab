@@ -149,10 +149,10 @@
   <line x1="422" y1="512" x2="664" y2="512" stroke="#2b3440"/>
   <text x="422" y="532" class="mono">2× Xeon Platinum 8160 · 48c / 96t</text>
   <text x="422" y="551" class="mono">192 GB RAM</text>
-  <text x="422" y="570" class="mono">2× 1 TB SSD · RAID1 ≈ 1 TB</text>
+  <text x="422" y="570" class="mono">8× 400 GB SAS SSD · RAID6 ≈ 2.2 TiB</text>
   <rect x="422" y="586" width="116" height="18" rx="5" fill="#e57000" fill-opacity=".14" stroke="#e57000" stroke-opacity=".4"/>
   <text x="431" y="599" class="tag" fill="#e57000">HEAVY COMPUTE</text>
-  <text x="422" y="625" class="mono" font-size="10" fill="#6e7681">SSD is the binding constraint —</text>
+  <text x="422" y="625" class="mono" font-size="10" fill="#6e7681">VM storage survives any 2 drives —</text>
   <text x="422" y="640" class="mono" font-size="10" fill="#6e7681">bulk data lives on the array →</text>
 
   <!-- file server -->
