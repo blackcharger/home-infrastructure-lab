@@ -1,7 +1,7 @@
 # Home Infrastructure Lab
 
 A self-directed, production-grade home lab I built to develop and demonstrate hands-on
-infrastructure, cloud, and DevSecOps skills. Everything here is self-taught and self-hosted,
+infrastructure, cloud, and DevOps skills. Everything here is self-taught and self-hosted,
 run against real uptime, backup, and recovery expectations — not a tutorial sandbox.
 
 > This README documents the architecture and design decisions. Configuration files with
