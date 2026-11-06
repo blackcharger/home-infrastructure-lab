@@ -2,7 +2,7 @@
 
 ## Status
 
-Accepted — 2026-10-03. Implemented 2026-11-06.
+Implemented 2026-11-06.
 
 ## Context
 
@@ -57,10 +57,6 @@ Run the firewall on a **dedicated, used 1U server** (Dell R230) outside the clus
   address. The automatic reinstall failed with no visible error. Both were installed by hand after
   the WAN came up, and the tunnel config was intact. Verify the installed packages after any
   restore. Don't assume they reinstalled.
-- **The runbook had a gap.** It unplugged the old host's only LAN link before the new router was
-  up. That cut off everything else on that host, including the Wi-Fi controller, for the rest of
-  the cutover. Next time, move the host to a second, pre-tested switch port, and only then pull
-  the firewall's link.
 
 ## Alternatives considered
 
@@ -74,9 +70,6 @@ It would need an add-in NIC anyway and halve the WAN without one.
 Rejected: it's a Broadcom card, and its FreeBSD driver is the less-trodden path compared with
 Intel's. The cluster node needs that card for its own 10 Gb uplink. Leaving it in place also kept
 rollback to a cable move.
-
-**The same server bundled with a low-power Xeon and a spare CPU.** Rejected on cost. Shipping
-alone nearly doubled the price, and a Xeon can be added to the cheaper box later if needed.
 
 ---
 
