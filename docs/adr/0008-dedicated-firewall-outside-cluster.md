@@ -43,8 +43,6 @@ Run the firewall on a **dedicated, used 1U server** (Dell R230) outside the clus
 - **Keep the old VM as a cold standby.** Stopped, with start-at-boot off, for at least a week
   after cutover. Rollback is moving two cables and starting a VM.
 
-Total cost was under $250 in used parts.
-
 ## Consequences
 
 - **Cluster work is no longer network work.** Either Proxmox node can be rebooted, drained or
@@ -54,27 +52,15 @@ Total cost was under $250 in used parts.
   standby that starts on its own. Losing it is an outage until the cold standby is started by
   hand. It was always a single point of failure. The difference is that it no longer fails *with*
   the cluster.
-- **Throughput at the full 2 Gbps hasn't been load-tested yet.** The entry-level CPU was judged
-  sufficient for routing at this speed. The socket takes a Xeon if IDS/IPS or a faster WAN ever
-  needs the headroom.
 - **Packages don't come with the config.** The restored configuration still listed the WireGuard
   and sudo packages, but the box booted while the WAN held a stale DHCP lease from its staging
   address. The automatic reinstall failed with no visible error. Both were installed by hand after
   the WAN came up, and the tunnel config was intact. Verify the installed packages after any
   restore. Don't assume they reinstalled.
-- **The cutover crashed the old host.** During the cable moves, the old host's 10 Gb card logged a
-  fatal PCIe bus error and the kernel panicked. A hard power cycle recovered it. The same slot had
-  logged an identical error months earlier, on a day the chassis was opened. Pulling the WAN module
-  logged a clean link-down, so the likelier cause is card seating or riser, not the hot-pull
-  itself. That card was going to carry the host's management bridge. That move now waits until the
-  card is reseated and has run clean.
 - **The runbook had a gap.** It unplugged the old host's only LAN link before the new router was
   up. That cut off everything else on that host, including the Wi-Fi controller, for the rest of
   the cutover. Next time, move the host to a second, pre-tested switch port, and only then pull
   the firewall's link.
-- From shutting down the VM to the desktop being back online took about 75 minutes, against a
-  planned 30. That included the host crash and a cable modem that ignored DHCP until it was
-  power-cycled.
 
 ## Alternatives considered
 
@@ -84,7 +70,7 @@ operation coupled to the network, and it makes the cluster's own failure test de
 **A smaller, older 1U server (R210 II class).** Cheaper, but 1 GbE onboard and a 2011 platform.
 It would need an add-in NIC anyway and halve the WAN without one.
 
-**Move the existing 10 Gb card from the cluster node into the new box.** Saves about $20.
+**Move the existing 10 Gb card from the cluster node into the new box.** Saves buying a NIC.
 Rejected: it's a Broadcom card, and its FreeBSD driver is the less-trodden path compared with
 Intel's. The cluster node needs that card for its own 10 Gb uplink. Leaving it in place also kept
 rollback to a cable move.
