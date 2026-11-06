@@ -41,7 +41,8 @@ and graceful failure under power or hardware loss.
 
 ## Networking & Segmentation
 
-- **pfSense** virtual firewall/gateway as the network core.
+- **pfSense** firewall/gateway on **dedicated bare metal**, deliberately outside the cluster, so
+  hypervisor maintenance or a cluster-node failure doesn't take the network down with it.
 - **Zero-trust-modeled segmentation** across separate VLANs for management, cameras, IoT, guest,
   and default user traffic, on a **10 Gb SFP+ backbone**.
 - **WireGuard** for encrypted remote access.
