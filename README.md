@@ -20,7 +20,7 @@ rejected. Includes the cross-node reset fault and its root cause.
 
 ## Overview
 
-Three enterprise Dell PowerEdge servers running a mix of virtualization, containerized
+Four enterprise Dell PowerEdge servers running a mix of virtualization, containerized
 services, segmented networking, and a multi-tier backup pipeline that reaches offsite cloud
 storage. Designed for high availability where it matters, least-privilege access throughout,
 and graceful failure under power or hardware loss.
@@ -42,7 +42,8 @@ and graceful failure under power or hardware loss.
 ## Networking & Segmentation
 
 - **pfSense** firewall/gateway on **dedicated bare metal**, deliberately outside the cluster, so
-  hypervisor maintenance or a cluster-node failure doesn't take the network down with it.
+  hypervisor maintenance or a cluster-node failure doesn't take the network down with it —
+  [ADR-0008](docs/adr/0008-dedicated-firewall-outside-cluster.md).
 - **Zero-trust-modeled segmentation** across separate VLANs for management, cameras, IoT, guest,
   and default user traffic, on a **10 Gb SFP+ backbone**.
 - **WireGuard** for encrypted remote access.

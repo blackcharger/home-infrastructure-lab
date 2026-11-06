@@ -23,6 +23,7 @@ supersedes the old one and both stay. The history of the reasoning is the useful
 | [0005](0005-storage-class-by-recovery-objective.md) | Choose storage class by recovery objective, not by data size | Accepted |
 | [0006](0006-ai-generated-code-is-reviewed.md) | Treat AI-generated operations code as untrusted until reviewed | Accepted |
 | [0007](0007-vm-storage-raid6-enterprise-sas.md) | Replace consumer SATA VM storage with RAID6 on used enterprise SAS SSDs | Accepted |
+| [0008](0008-dedicated-firewall-outside-cluster.md) | Move the firewall off the cluster onto dedicated hardware | Accepted |
 
 ## A note on scope
 
